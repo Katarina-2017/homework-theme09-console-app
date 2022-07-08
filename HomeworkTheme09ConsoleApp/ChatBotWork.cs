@@ -30,36 +30,105 @@ namespace HomeworkTheme09ConsoleApp
 
             Console.WriteLine($"{text} TypeMessage: {e.Message.Type.ToString()}");
 
-            if (e.Message.Text.ToLower()=="/start")
+            switch (e.Message.Type)
             {
-                bot.SendTextMessageAsync(e.Message.Chat.Id,$"Привет, {e.Message.Chat.FirstName}! \n Я бот \"без-забот\", вот {BotCommand()}");
-            }
-            else
-            {
-                bot.SendTextMessageAsync(e.Message.Chat.Id, $"Мне не удалось распознать ваш запрос,\n{BotCommand()}");
-            }
+                case Telegram.Bot.Types.Enums.MessageType.Text:
+                    if (e.Message.Text.ToLower() == "/start")
+                    {
+                        bot.SendTextMessageAsync(e.Message.Chat.Id, $"Привет, {e.Message.Chat.FirstName}! \n Я бот \"без-забот\", вот {BotCommandTextMessage()}");
+                    }
+                    else
+                    {
+                        bot.SendTextMessageAsync(e.Message.Chat.Id, $"Мне не удалось распознать ваш запрос,\n{BotCommandTextMessage()}");
+                    }
+                    break;
+                case Telegram.Bot.Types.Enums.MessageType.Photo:
+                    Console.WriteLine(e.Message.Photo.Last().FileId);
+                    Console.WriteLine(e.Message.Photo.Last().FileSize);
+                    string fileNamePhoto = e.Message.Photo.Last().FileId.ToString() + ".jpg";
 
-            if (e.Message.Type == Telegram.Bot.Types.Enums.MessageType.Document)
-            {
-                Console.WriteLine(e.Message.Document.FileId);
-                Console.WriteLine(e.Message.Document.FileName);
-                Console.WriteLine(e.Message.Document.FileSize);
+                    DownLoad(e.Message.Photo.Last().FileId, e.Message.Chat.Id, fileNamePhoto);
+                    break;
 
-                //DownLoad(e.Message.Document.FileId, e.Message.Document.FileName);
+                case Telegram.Bot.Types.Enums.MessageType.Audio:
+                    Console.WriteLine(e.Message.Audio.FileId);
+                    Console.WriteLine(e.Message.Audio.FileName);
+                    Console.WriteLine(e.Message.Audio.FileSize);
+
+                    DownLoad(e.Message.Audio.FileId, e.Message.Chat.Id, e.Message.Audio.FileName);
+                    break;
+                case Telegram.Bot.Types.Enums.MessageType.Video:
+                    Console.WriteLine(e.Message.Video.FileId);
+                    Console.WriteLine(e.Message.Video.FileName);
+                    Console.WriteLine(e.Message.Video.FileSize);
+
+                    DownLoad(e.Message.Video.FileId, e.Message.Chat.Id, e.Message.Video.FileName);
+                    break;
+              
+                case Telegram.Bot.Types.Enums.MessageType.Voice:
+                    Console.WriteLine(e.Message.Voice.FileId);
+                    Console.WriteLine(e.Message.Voice.FileSize);
+
+                    DownLoad(e.Message.Voice.FileId, e.Message.Chat.Id, e.Message.Voice.FileId);
+                    break;
+               
+                case Telegram.Bot.Types.Enums.MessageType.Document:
+                    Console.WriteLine(e.Message.Document.FileId);
+                    Console.WriteLine(e.Message.Document.FileName);
+                    Console.WriteLine(e.Message.Document.FileSize);
+                    
+                    DownLoad(e.Message.Document.FileId, e.Message.Chat.Id, e.Message.Document.FileName);
+                    break;
+
+                default:
+                    break;
             }
-
-            if (e.Message.Text == null) return;
 
         }
 
-        private static string BotCommand()
+        private static string BotCommandTextMessage()
         {
             string stringCommand = $"список команд, которые я понимаю:" +
-                $"\n \\sky - узнать прогноз погоды в вашем городе" +
-                $"\n \\files - просмотреть список загруженных файлов" +
+                $"\n /sky - узнать прогноз погоды в вашем городе" +
+                $"\n /files - просмотреть список загруженных файлов" +
                 $"\n также я сохраняю аудиосообщения, картинки и произвольные файлы" +
                 $"\n и позволяю скачать выбранный файл";
             return stringCommand;
         }
+
+        static async void DownLoad(string fileId, long userId, string fileName)
+        {
+
+            string pathDir = @"C:\FileUsers\";
+
+            string pathSubDir = userId.ToString();
+
+            DirectoryInfo dirInfo = new DirectoryInfo(pathDir);
+            if (!dirInfo.Exists)
+            {
+                dirInfo.Create();
+
+            }
+
+            Directory.CreateDirectory($"{pathDir}/{pathSubDir}");
+
+            string pathFull = Path.Combine(pathDir, pathSubDir, fileName);
+
+            try
+            {
+                var file = await bot.GetFileAsync(fileId);
+
+                using (var fs = new FileStream(pathFull, FileMode.Create))
+                {
+                    await bot.DownloadFileAsync(file.FilePath, fs);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка загрузки: " + ex.Message);
+            }
+        }
+
+       
     }
 }
