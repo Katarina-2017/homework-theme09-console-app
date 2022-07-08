@@ -37,11 +37,32 @@ namespace HomeworkTheme09ConsoleApp
                     {
                         bot.SendTextMessageAsync(e.Message.Chat.Id, $"Привет, {e.Message.Chat.FirstName}! \n Я бот \"без-забот\", вот {BotCommandTextMessage()}");
                     }
+                    if (e.Message.Text.ToLower() == "/files")
+                    {
+                        string pathDir = @"C:\FileUsers\";
+
+                        string pathSubDir = e.Message.Chat.Id.ToString();
+
+                        string dirName = Path.Combine(pathDir, pathSubDir);
+
+                        bot.SendTextMessageAsync(e.Message.Chat.Id, $"Список загруженных вами файлов:\n");
+
+                        if (Directory.Exists(dirName))
+                        {
+                            string[] files = Directory.GetFiles(dirName);
+                            foreach (string s in files)
+                            {
+                                bot.SendTextMessageAsync(e.Message.Chat.Id, $"{s}\n");
+                            }
+
+                        }
+                    }
                     else
                     {
                         bot.SendTextMessageAsync(e.Message.Chat.Id, $"Мне не удалось распознать ваш запрос,\n{BotCommandTextMessage()}");
                     }
                     break;
+
                 case Telegram.Bot.Types.Enums.MessageType.Photo:
                     Console.WriteLine(e.Message.Photo.Last().FileId);
                     Console.WriteLine(e.Message.Photo.Last().FileSize);
@@ -85,6 +106,8 @@ namespace HomeworkTheme09ConsoleApp
             }
 
         }
+
+       
 
         private static string BotCommandTextMessage()
         {
