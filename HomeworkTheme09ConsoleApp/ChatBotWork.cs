@@ -45,16 +45,27 @@ namespace HomeworkTheme09ConsoleApp
 
                         string dirName = Path.Combine(pathDir, pathSubDir);
 
-                        bot.SendTextMessageAsync(e.Message.Chat.Id, $"Список загруженных вами файлов:\n");
+                        var directory = new DirectoryInfo(dirName);
 
-                        if (Directory.Exists(dirName))
+                        if (directory.Exists)
                         {
-                            string[] files = Directory.GetFiles(dirName);
-                            foreach (string s in files)
+                            FileInfo[] files = directory.GetFiles();
+                            if (files.Length > 0)
                             {
-                                bot.SendTextMessageAsync(e.Message.Chat.Id, $"{s}\n");
+                                bot.SendTextMessageAsync(e.Message.Chat.Id, $"Список загруженных вами файлов:\n");
+                                foreach (FileInfo file in files)
+                                {
+                                        bot.SendTextMessageAsync(e.Message.Chat.Id, $"/{file.Name}\n");
+                                }
                             }
-
+                            else
+                            {
+                                bot.SendTextMessageAsync(e.Message.Chat.Id, $"В вашей папке нет файлов! \n {BotCommandTextMessage()}");
+                            }
+                        }
+                        else
+                        {
+                            bot.SendTextMessageAsync(e.Message.Chat.Id, $"Вы не отправили мне ниодного файла!\n {BotCommandTextMessage()}");
                         }
                     }
                     else
