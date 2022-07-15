@@ -100,8 +100,9 @@ namespace HomeworkTheme09ConsoleApp
                 case Telegram.Bot.Types.Enums.MessageType.Voice:
                     Console.WriteLine(e.Message.Voice.FileId);
                     Console.WriteLine(e.Message.Voice.FileSize);
+                    string fileNameVoice = e.Message.Voice.FileId.ToString() + ".m4a";
 
-                    DownLoad(e.Message.Voice.FileId, e.Message.Chat.Id, e.Message.Voice.FileId);
+                    DownLoad(e.Message.Voice.FileId, e.Message.Chat.Id, fileNameVoice);
                     break;
                
                 case Telegram.Bot.Types.Enums.MessageType.Document:
